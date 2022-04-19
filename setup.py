@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="nils_utils",
-    version="0.0.4",
+    version="0.0.5",
     author="Nils Golembiewski",
     author_email="niolopa@gmail.com",
     description="Python utils for all kinds of stuff",
@@ -16,5 +16,6 @@ setuptools.setup(
     install_requires=[
         "ray",
         "tqdm",
+        "pyyaml",
     ],
 )
