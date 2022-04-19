@@ -28,9 +28,9 @@ assert cfg == Config(1, 4, 4.5)
 # And an optional key 'deltas', a list of entries which contain differences compared to base
 yaml = """
 base:
-param1: 1
-param2: 2
-param3: 4.5
+  param1: 1
+  param2: 2
+  param3: 4.5
 deltas:
 - param2: 4
   param3: 1.0
