@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import pytest
 from src import experiment_tools
-from src.experiment_tools.config_gen import from_yaml
+from src.experiment_tools.config_gen import load_from_yaml
 import io
 
 def test_decorator():
@@ -11,7 +11,7 @@ def test_decorator():
         "param2: 1\n" + \
         "param3: 5.5\n"
 
-    @from_yaml(custom_parse={"param2": lambda x: 2 * x})
+    @load_from_yaml(custom_parse={"param2": lambda x: 2 * x})
     @dataclass
     class Config:
         param1: int

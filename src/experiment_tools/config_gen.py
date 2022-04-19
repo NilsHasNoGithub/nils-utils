@@ -17,7 +17,7 @@ def _load_yaml(yaml) -> dict:
     else:
         return yaml_lib.load(yaml, yaml_lib.FullLoader)
 
-def from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
+def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
 
     if custom_parse is None: custom_parse = dict()
 
