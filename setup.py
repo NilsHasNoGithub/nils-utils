@@ -9,8 +9,8 @@ setuptools.setup(
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/NilsHasNoGithub/nils-utils",
-    package_dir={"": "src"},
-    packages=setuptools.find_packages("src"),
+    package_dir={"": "nils_utils"},
+    packages=setuptools.find_packages("nils_utils"),
     python_requires=">=3.7",
     install_requires=[
         "ray",
