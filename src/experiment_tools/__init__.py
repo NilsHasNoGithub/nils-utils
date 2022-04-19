@@ -1,0 +1,1 @@
+from .config_gen import from_yaml
