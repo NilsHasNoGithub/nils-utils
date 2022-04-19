@@ -56,4 +56,3 @@ deltas:
     cfg: Config = Config.from_dict(config_dict)
     assert cfg == Config(1, 4, 4.5)
 
-    ...
