@@ -9,13 +9,13 @@ from typing import Union, Optional, Dict
 import yaml as yaml_lib
 
 
-
 def _load_yaml(yaml) -> dict:
     if isinstance(yaml, (str, pathlib.Path, bytes, os.PathLike)):
         with open(yaml) as f:
             return yaml_lib.load(f, yaml_lib.FullLoader)
     else:
         return yaml_lib.load(yaml, yaml_lib.FullLoader)
+
 
 def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
     """
@@ -28,7 +28,8 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
     - `custom_parse`: Dictionary with parameter names as keys and callables as values, which allows custom parsing
     """
 
-    if custom_parse is None: custom_parse = dict()
+    if custom_parse is None:
+        custom_parse = dict()
 
     if inspect.isfunction(arg0):
         raise ValueError(f"{arg0} is a function, expected a class")
@@ -39,12 +40,14 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
 
         annotations: dict = cls_dict["__annotations__"]
         non_default_params = {k for k in annotations.keys() if k not in cls_dict.keys()}
-        default_params = {k: cls_dict[k] for k in annotations.keys() if k in cls_dict.keys()}
+        default_params = {
+            k: cls_dict[k] for k in annotations.keys() if k in cls_dict.keys()
+        }
 
         def _parse(k, v):
             if k in custom_parse.keys():
                 return custom_parse[k](v)
-            
+
             return v
 
         def from_dict(d: dict) -> cls:
@@ -60,7 +63,7 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
             for p in default_params.keys():
                 v = d.get(p, None)
                 if v is None:
-                    v =  default_params[p]
+                    v = default_params[p]
                 else:
                     v = _parse(p, v)
                 setattr(instance, p, v)
@@ -72,7 +75,9 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
         def from_yaml_file(yaml: Union[str, typing.TextIO, typing.BinaryIO]) -> cls:
             return from_dict(_load_yaml(yaml))
 
-        def from_multi_conf_yaml_file(yaml: Union[str, typing.TextIO, typing.BinaryIO]) -> cls:
+        def from_multi_conf_yaml_file(
+            yaml: Union[str, typing.TextIO, typing.BinaryIO]
+        ) -> cls:
             """
             The format:
             Object `base`: default experiment configuration, containing all hyperparameters
@@ -101,10 +106,11 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
 
             return result
 
-
         setattr(cls, "from_dict", staticmethod(from_dict))
         setattr(cls, "from_yaml_file", staticmethod(from_yaml_file))
-        setattr(cls, "from_multi_conf_yaml_file", staticmethod(from_multi_conf_yaml_file))
+        setattr(
+            cls, "from_multi_conf_yaml_file", staticmethod(from_multi_conf_yaml_file)
+        )
 
         return cls
 
@@ -112,4 +118,3 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
         return decorator(arg0)
 
     return decorator
-

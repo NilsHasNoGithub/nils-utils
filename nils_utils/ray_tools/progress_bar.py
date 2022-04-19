@@ -6,6 +6,7 @@ from typing import Tuple
 from time import sleep
 
 import ray
+
 # For typing purposes
 from ray.actor import ActorHandle
 from tqdm import tqdm
@@ -14,6 +15,7 @@ try:
     import py.test
 except ImportError:
     pass
+
 
 @ray.remote
 class ProgressBarActor:
@@ -52,6 +54,7 @@ class ProgressBarActor:
         Returns the total number of complete items.
         """
         return self.counter
+
 
 # Back on the local node, once you launch your remote Ray tasks, call
 # `print_until_done`, which will feed everything back into a `tqdm` counter.
@@ -117,6 +120,5 @@ def test_progress_bar():
 
         assert tasks == list(range(num_ticks))
         assert num_ticks == ray.get(actor.get_counter.remote())
-
 
     run()
