@@ -3,5 +3,5 @@ try:
 except ImportError:
     pass
 
-import experiment_tools
+from . import experiment_tools
 # import ray
