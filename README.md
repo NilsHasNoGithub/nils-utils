@@ -32,10 +32,10 @@ base:
   param2: 2
   param3: 4.5
 deltas:
-- param2: 4
-  param3: 1.0
-- param1: 2
-  param4: "hello world"
+  - param2: 4
+    param3: 1.0
+  - param1: 2
+    param4: "hello world"
 """
 cfgs: List[Config] = Config.from_multi_conf_yaml_file(
     io.BytesIO(yaml.encode("utf-8"))
