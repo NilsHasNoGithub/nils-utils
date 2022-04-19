@@ -18,6 +18,15 @@ def _load_yaml(yaml) -> dict:
         return yaml_lib.load(yaml, yaml_lib.FullLoader)
 
 def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
+    """
+    Adds the following functions to a class based on annotations
+    - `from_dict`
+    - `from_yaml_file`
+    - `from_multi_conf_yaml_file`
+
+    ## Parameters
+    - `custom_parse`: Dictionary with parameter names as keys and callables as values, which allows custom parsing
+    """
 
     if custom_parse is None: custom_parse = dict()
 
