@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import pytest
-from src import experiment_tools
-from src.experiment_tools.config_gen import load_from_yaml
+from nils_utils import experiment_tools
+from nils_utils.experiment_tools.config_gen import load_from_yaml
 import io
 
 def test_decorator():
