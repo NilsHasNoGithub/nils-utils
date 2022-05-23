@@ -32,7 +32,7 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None, yaml_loader: 
         custom_parse = dict()
 
     if yaml_loader is None:
-        yaml_loader = yaml_lib.FullLoader()
+        yaml_loader = yaml_lib.FullLoader
 
     if inspect.isfunction(arg0):
         raise ValueError(f"{arg0} is a function, expected a class")
