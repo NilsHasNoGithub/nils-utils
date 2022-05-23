@@ -5,19 +5,19 @@ import io
 import os
 import pathlib
 import typing
-from typing import Union, Optional, Dict
+from typing import Any, Union, Optional, Dict
 import yaml as yaml_lib
 
 
-def _load_yaml(yaml) -> dict:
+def _load_yaml(yaml, loader: Any) -> dict:
     if isinstance(yaml, (str, pathlib.Path, bytes, os.PathLike)):
         with open(yaml) as f:
-            return yaml_lib.load(f, yaml_lib.FullLoader)
+            return yaml_lib.load(f, loader)
     else:
-        return yaml_lib.load(yaml, yaml_lib.FullLoader)
+        return yaml_lib.load(yaml, loader)
 
 
-def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
+def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None, yaml_loader: Optional[Any] = None):
     """
     Adds the following functions to a class based on annotations
     - `from_dict`
@@ -30,6 +30,9 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
 
     if custom_parse is None:
         custom_parse = dict()
+
+    if yaml_loader is None:
+        yaml_loader = yaml_lib.FullLoader()
 
     if inspect.isfunction(arg0):
         raise ValueError(f"{arg0} is a function, expected a class")
@@ -57,8 +60,6 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
                 assert p in d.keys(), f"Missing key in dictionary: {p}"
                 v = _parse(p, d[p])
                 setattr(instance, p, v)
-                # instance.__dict__[p] = v
-                # instance.p = v
 
             for p in default_params.keys():
                 v = d.get(p, None)
@@ -67,13 +68,11 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
                 else:
                     v = _parse(p, v)
                 setattr(instance, p, v)
-                # instance.__dict__[p] = v
-                # instance.p = v
 
             return instance
 
         def from_yaml_file(yaml: Union[str, typing.TextIO, typing.BinaryIO]) -> cls:
-            return from_dict(_load_yaml(yaml))
+            return from_dict(_load_yaml(yaml, yaml_loader))
 
         def from_multi_conf_yaml_file(
             yaml: Union[str, typing.TextIO, typing.BinaryIO]
@@ -90,7 +89,7 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None):
             A list of experiment configurations, the first of which is the base config
             """
 
-            multi_conf = _load_yaml(yaml)
+            multi_conf = _load_yaml(yaml, yaml_loader)
 
             base_dict: dict = multi_conf["base"]
             result = [from_dict(base_dict)]
