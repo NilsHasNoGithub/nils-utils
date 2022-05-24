@@ -57,16 +57,16 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None, yaml_loader: 
             instance = cls.__new__(cls)
 
             for p in non_default_params:
-                assert p in d.keys(), f"Missing key in dictionary: {p}"
+                assert p in d.keys(), f"Missing key in dictionary: {p}, got keys: {list(d.keys())}"
                 v = _parse(p, d[p])
                 setattr(instance, p, v)
 
             for p in default_params.keys():
-                v = d.get(p, None)
-                if v is None:
-                    v = default_params[p]
+                if p in d.keys():
+                    v = _parse(p, d[p])
                 else:
-                    v = _parse(p, v)
+                    v = default_params[p]
+                    
                 setattr(instance, p, v)
 
             return instance

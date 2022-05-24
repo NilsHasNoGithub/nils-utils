@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="nils_utils",
-    version="0.0.7",
+    version="0.0.8",
     author="Nils Golembiewski",
     author_email="niolopa@gmail.com",
     description="Python utils for all kinds of stuff",
