@@ -1,13 +1,13 @@
 from typing import List
 import pytest
 from nils_utils import experiment_tools
-from nils_utils.experiment_tools import load_from_yaml
+from nils_utils.experiment_tools import load_from_cfg_file
 from dataclasses import dataclass
 import io
 
 
 def test_decorator():
-    @load_from_yaml(custom_parse={"param2": lambda x: 2 * x})
+    @load_from_cfg_file(custom_parse={"param2": lambda x: 2 * x})
     @dataclass  # dataclass not necessary, but adds normal dataclass functionality
     class Config:
         param1: int
@@ -21,8 +21,16 @@ param1: 1
 param2: 2
 param3: 4.5
 """
-    cfg: Config = Config.from_yaml_file(io.BytesIO(yaml.encode("utf-8")))
-    assert cfg == Config(1, 4, 4.5)
+    # Same for toml
+    toml = """
+param1 = 1
+param2 = 2
+param3 = 4.5
+"""
+
+    cfg_yaml: Config = Config.from_yaml_file(io.BytesIO(yaml.encode("utf-8")))
+    cfg_toml: Config = Config.from_toml_file(io.BytesIO(toml.encode("utf-8")))
+    assert cfg_yaml == cfg_toml == Config(1, 4, 4.5)
 
     # Load multiple configurations using a multi-conf format
     # Multi conf is a yaml file with an entry base 'base', which is the standard configuration
@@ -38,10 +46,29 @@ deltas:
     - param1: 2
       param4: "hello world"
 """
-    cfgs: List[Config] = Config.from_multi_conf_yaml_file(
+
+    toml = """
+[base]
+param1 = 1
+param2 = 2
+param3 = 4.5
+
+[[deltas]]
+param2 = 4
+param3 = 1.0
+
+[[deltas]]
+param1 = 2
+param4 = "hello world"
+"""
+
+    cfgs_yaml: List[Config] = Config.from_multi_conf_yaml_file(
         io.BytesIO(yaml.encode("utf-8"))
     )
-    assert cfgs == [
+    cfgs_toml: List[Config] = Config.from_multi_conf_toml_file(
+        io.BytesIO(toml.encode("utf-8"))
+    )
+    assert cfgs_yaml == cfgs_toml == [
         Config(1, 4, 4.5),
         Config(1, 8, 1.0),
         Config(2, 4, 4.5, "hello world"),

@@ -1,12 +1,12 @@
-from ast import List
 from copy import deepcopy
 import inspect
 import io
 import os
 import pathlib
 import typing
-from typing import Any, Union, Optional, Dict
+from typing import Any, Union, Optional, Dict, List
 import yaml as yaml_lib
+import toml as toml_lib
 
 
 def _load_yaml(yaml, loader: Any) -> dict:
@@ -16,13 +16,27 @@ def _load_yaml(yaml, loader: Any) -> dict:
     else:
         return yaml_lib.load(yaml, loader)
 
+def _load_toml(toml) -> dict:
+    if isinstance(toml, (str, pathlib.Path, bytes, os.PathLike)):
+        with open(toml, "r") as f:
+            return toml_lib.load(f)
+    elif isinstance(toml, io.BytesIO):
+        txt = toml.read().decode("utf-8")
+        return toml_lib.loads(txt)
+    else:
+        return toml_lib.load(toml)
 
-def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None, yaml_loader: Optional[Any] = None):
+
+
+
+def load_from_cfg_file(arg0=None, custom_parse: Optional[Dict] = None, yaml_loader: Optional[Any] = None):
     """
     Adds the following functions to a class based on annotations
     - `from_dict`
     - `from_yaml_file`
     - `from_multi_conf_yaml_file`
+    - `from_toml_file`
+    - `from_multi_conf_toml_file`
 
     ## Parameters
     - `custom_parse`: Dictionary with parameter names as keys and callables as values, which allows custom parsing
@@ -71,8 +85,27 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None, yaml_loader: 
 
             return instance
 
+        def from_multi_conf_dict(multi_conf: dict) -> List[cls]:
+            base_dict: dict = multi_conf["base"]
+            result: List[cls] = [from_dict(base_dict)]
+
+            if "deltas" not in multi_conf.keys():
+                return result
+
+            deltas: List[dict] = multi_conf["deltas"]
+            for delta in deltas:
+                delta_dict = deepcopy(base_dict)
+                delta_dict.update(delta)
+                result.append(from_dict(delta_dict))
+
+            return result
+
+
         def from_yaml_file(yaml: Union[str, typing.TextIO, typing.BinaryIO]) -> cls:
             return from_dict(_load_yaml(yaml, yaml_loader))
+
+        def from_toml_file(toml: Union[str, typing.TextIO, typing.BinaryIO]) -> cls:
+            return from_dict(_load_toml(toml))
 
         def from_multi_conf_yaml_file(
             yaml: Union[str, typing.TextIO, typing.BinaryIO]
@@ -89,27 +122,34 @@ def load_from_yaml(arg0=None, custom_parse: Optional[Dict] = None, yaml_loader: 
             A list of experiment configurations, the first of which is the base config
             """
 
-            multi_conf = _load_yaml(yaml, yaml_loader)
+            return from_multi_conf_dict(_load_yaml(yaml, yaml_loader))
 
-            base_dict: dict = multi_conf["base"]
-            result = [from_dict(base_dict)]
+        def from_multi_conf_toml_file(
+            toml: Union[str, typing.TextIO, typing.BinaryIO]
+        ) -> cls:
+            """
+            The format:
+            Object `base`: default experiment configuration, containing all hyperparameters
+            List `deltas`: List of changes in hyperparameters compared to base, all deltas result in a new configuration
 
-            if "deltas" not in multi_conf.keys():
-                return result
+            ## params
+            - `toml_file`: file containing the configuration
 
-            deltas: List[dict] = multi_conf["deltas"]
-            for delta in deltas:
-                delta_dict = deepcopy(base_dict)
-                delta_dict.update(delta)
-                result.append(from_dict(delta_dict))
+            ## returns
+            A list of experiment configurations, the first of which is the base config
+            """
 
-            return result
+            return from_multi_conf_dict(_load_toml(toml))
+
+            
 
         setattr(cls, "from_dict", staticmethod(from_dict))
         setattr(cls, "from_yaml_file", staticmethod(from_yaml_file))
+        setattr(cls, "from_toml_file", staticmethod(from_toml_file))
         setattr(
             cls, "from_multi_conf_yaml_file", staticmethod(from_multi_conf_yaml_file)
         )
+        setattr(cls, "from_multi_conf_toml_file", staticmethod(from_multi_conf_toml_file))
 
         return cls
 
